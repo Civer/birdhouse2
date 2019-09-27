@@ -13,7 +13,7 @@ Backend will be an express REST API for handling whole business logic.
 The following instructions are meant to help you with installation.
 Right now there is no automatic installer available
 
-### Getting started
+### Requirements
 
 Birdhouse requirements are:
 
