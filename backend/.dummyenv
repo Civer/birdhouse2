@@ -1,2 +1,19 @@
-DUMMY=true
-COMMENT=Change the name of this file to be just .env and set DUMMY to false
+# When using app variables are imported from file .env
+# Rename this file to .env and change dummy flag to false
+
+# Dummy flag
+BACKEND_DUMMY = false
+
+# Environmental flags
+BACKEND_STAGING = false
+
+# API URLs
+## Development 
+BACKEND_DEV_MONGO_URL = 
+BACKEND_DEV_MONGO_PORT = 
+## Staging
+BACKEND_STAG_MONGO_URL = 
+BACKEND_STAG_MONGO_PORT = 
+## Production
+BACKEND_PROD_MONGO_URL = 
+BACKEND_PROD_MONGO_PORT = 
