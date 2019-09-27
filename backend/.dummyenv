@@ -1,0 +1,2 @@
+DUMMY=true
+COMMENT=Change the name of this file to be just .env and set DUMMY to false

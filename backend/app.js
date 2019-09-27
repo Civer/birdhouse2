@@ -1,3 +1,4 @@
+require("dotenv").config({ debug: process.env.DOTENV_DEBUG === "true" });
 var createError = require("http-errors");
 var express = require("express");
 var path = require("path");
