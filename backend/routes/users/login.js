@@ -1,6 +1,5 @@
 var express = require("express");
 var router = express.Router();
-var MongoClient = require("mongodb").MongoClient;
 var authFunctions = require("../functions/authenticationFunctions");
 
 const url = process.env.BACKEND_MONGO_URL;
@@ -14,25 +13,57 @@ var returnObject = {
 router.post("/", function(req, res, next) {
   var username = req.body.username;
   var password = req.body.password;
+  var storedUserObject = {};
 
   authFunctions
-    .hasActiveSessionPromise()
-    .then(
-      function foundActiveSession(result) {
-        return authFunctions.killActiveSessionPromise(result);
-      },
-      function foundNoActiveSession(error) {
-        //return authFunctions.check
+    .checkUserExists()
+    .then(resultObject => {
+      if (resultObject.userExists === true) {
+        return authFunctions.getUserObject(resultObject.userid);
+      } else {
+        return Promise.reject([
+          {
+            id: 2020,
+            desc: "User is not known."
+          }
+        ]);
       }
-    )
-    .then(
-      function(result) {
-        console.log(result);
-      },
-      function(error) {
-        console.log(error);
+    })
+    .then(userObject => {
+      storedUserObject = userObject;
+      if (userObject.isVerified === true) {
+        return authFunctions.getUserSecurityInformation(userObject.id);
+      } else {
+        return Promise.reject([
+          {
+            id: 2021,
+            desc: "User is not verified."
+          }
+        ]);
       }
-    );
+    })
+    .then(securityInformation => {
+      return authFunctions.checkPassword(
+        storedUserObject.id,
+        securityInformation.password,
+        securityInformation.salt
+      );
+    })
+    .then(passwordIsValid => {
+      if (passwordIsValid === true) {
+        return authFunctions.createNewSession(storedUserObject.id);
+      } else {
+        return Promise.reject([
+          {
+            id: 2022,
+            desc: "Password is invalid."
+          }
+        ]);
+      }
+    })
+    .catch(error => {
+      console.log(error);
+    });
 
   //return Promise.reject(error);
 

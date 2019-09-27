@@ -1,3 +1,5 @@
+var commonFunctions = require("./commonFunctions");
+
 /**
  * This function will check if an user exists and return its ID
  *
@@ -10,19 +12,35 @@
 var checkUserExists = function(username) {
   return new Promise(function(resolve, reject) {
     var returnObject = {
-      userExists: false,
-      userid: ""
+      userExists: null,
+      userid: null
     };
 
-    var errors = [];
+    username = "Peter";
 
-    //Check if user has session
+    var collection = "users";
+    var query = { username: username };
 
-    if (errors.length === 0) {
-      resolve(returnObject);
-    } else {
-      reject(errors);
-    }
+    commonFunctions
+      .getDataFromDB(collection, query)
+      .then(result => {
+        if (result.length === 0) {
+          returnObject.userExists = false;
+          resolve(returnObject);
+        } else {
+          returnObject.userExists = true;
+          returnObject.userid = result[0]._id;
+          resolve(returnObject);
+        }
+      })
+      .catch(err => {
+        reject([
+          {
+            id: 2001,
+            desc: "Error with database connection."
+          }
+        ]);
+      });
   });
 };
 
@@ -64,7 +82,6 @@ var checkEmailExists = function(email) {
  * @returns {Object.lastname}            String  Lastname of user
  * @returns {Object.country}             String  Country of user as ISO Code
  * @returns {Object.isVerified}          Boolean State if user is verified
- * @returns {Object.isActive}            Boolean State if user is locked
  * @returns {Object.dateAccountCreated}  Date    Account Creation Date
  * @returns {Object.dateLastLogin}       Date    Last Login Date
  */
@@ -78,7 +95,6 @@ var getUserObject = function(userid) {
       lastname: "",
       country: "",
       isVerified: false,
-      isActive: false,
       dateAccountCreated: new Date(),
       dateLastLogin: new Date()
     };
@@ -88,7 +104,7 @@ var getUserObject = function(userid) {
     //Check if user has session
 
     if (errors.length === 0) {
-      resolve(returnObject);
+      resolve(userObject);
     } else {
       reject(errors);
     }
@@ -102,16 +118,19 @@ var getUserObject = function(userid) {
  * @returns {String}        Salt stored in DB for given userid
  */
 
-var getUserSalt = function(userid) {
+var getUserSecurityInformation = function(userid) {
   return new Promise(function(resolve, reject) {
-    var salt = "";
+    var securityInformation = {
+      salt: "",
+      password: ""
+    };
 
     var errors = [];
 
     //Check if user has session
 
     if (errors.length === 0) {
-      resolve(salt);
+      resolve(securityInformation);
     } else {
       reject(errors);
     }
@@ -474,6 +493,7 @@ var authFunctions = {
   checkEmailExists,
 
   getUserObject,
+  getUserSecurityInformation,
 
   checkPassword,
 
