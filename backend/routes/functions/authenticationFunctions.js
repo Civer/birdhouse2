@@ -16,13 +16,17 @@ var checkUserExists = function(username) {
       userid: null
     };
 
-    username = "Peter";
-
+    //Set MongoDB collection
     var collection = "users";
-    var query = { username: username };
+
+    //Search for users with this username
+    var query = { usernameupper: username.toLocaleUpperCase() };
+
+    //Limit results
+    var projection = { projection: { _id: 1 } };
 
     commonFunctions
-      .getDataFromDB(collection, query)
+      .dbFetchData(collection, query, projection)
       .then(result => {
         if (result.length === 0) {
           returnObject.userExists = false;
@@ -60,15 +64,35 @@ var checkEmailExists = function(email) {
       userid: 0
     };
 
-    var errors = [];
+    //Set MongoDB collection
+    var collection = "users";
 
-    //Check if user has session
+    //Search for capitalized email
+    var query = { emailupper: email.toLocaleUpperCase() };
 
-    if (errors.length === 0) {
-      resolve(returnObject);
-    } else {
-      reject(errors);
-    }
+    //Limit results
+    var projection = { projection: { _id: 1 } };
+
+    commonFunctions
+      .dbFetchData(collection, query, projection)
+      .then(result => {
+        if (result.length === 0) {
+          returnObject.userExists = false;
+          resolve(returnObject);
+        } else {
+          returnObject.userExists = true;
+          returnObject.userid = result[0]._id;
+          resolve(returnObject);
+        }
+      })
+      .catch(err => {
+        reject([
+          {
+            id: 2001,
+            desc: "Error with database connection."
+          }
+        ]);
+      });
   });
 };
 
@@ -98,6 +122,8 @@ var getUserObject = function(userid) {
       dateAccountCreated: new Date(),
       dateLastLogin: new Date()
     };
+
+    console.log(userid);
 
     var errors = [];
 

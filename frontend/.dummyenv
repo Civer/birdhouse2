@@ -1,1 +1,19 @@
+# When using app variables are imported from file .env
+# Rename this file to .env and change dummy flag to false
+
+# Dummy flag
 REACT_APP_DUMMY = false
+
+# Environmental flags
+REACT_APP_STAGING = false
+
+# API URLs
+## Development 
+REACT_APP_DEV_API_URL = 
+REACT_APP_DEV_API_PORT = 
+## Staging
+REACT_APP_DEV_API_URL = 
+REACT_APP_DEV_API_PORT = 
+## Production
+REACT_APP_DEV_API_URL = 
+REACT_APP_DEV_API_PORT = 

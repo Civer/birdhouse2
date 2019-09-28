@@ -1,6 +1,14 @@
 var MongoClient = require("mongodb").MongoClient;
 
-var getDataFromDB = function(collection, query) {
+/**
+ * This function will find data in the MongoDB
+ *
+ * @param {String} collection Name of MongoDB collection
+ * @param {String} query      MongoDB conform query object
+ *
+ * @returns {Array.object}    MongoDB result
+ */
+var dbFetchData = function(collection, query, projection) {
   return new Promise(function(resolve, reject) {
     MongoClient.connect(process.env.BACKEND_MONGO_URL, {
       useNewUrlParser: true,
@@ -11,11 +19,47 @@ var getDataFromDB = function(collection, query) {
 
         dbo
           .collection(collection)
-          .find(query)
+          .find(query, projection)
           .toArray()
           .then(result => {
-            resolve(result);
             db.close();
+            resolve(result);
+          })
+          .catch(error => {
+            console.log(error);
+            reject("Database Error");
+          });
+      })
+      .catch(error => {
+        console.log(error);
+        reject("Database Error");
+      });
+  });
+};
+
+/**
+ * This function will add data to the MongoDB
+ *
+ * @param {String} collection                 Name of MongoDB collection
+ * @param {Array with objects} insertObject   MongoDB conform query object
+ *
+ * @returns {Number}                          Number of successful inserts
+ */
+var dbInsertData = function(collection, insertObject) {
+  return new Promise(function(resolve, reject) {
+    MongoClient.connect(process.env.BACKEND_MONGO_URL, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    })
+      .then(function(db) {
+        var dbo = db.db(process.env.BACKEND_MONGO_DATABASE);
+
+        dbo
+          .collection(collection)
+          .insertMany(insertObject)
+          .then(result => {
+            db.close();
+            resolve(result.insertedCount);
           })
           .catch(error => {
             console.log(error);
@@ -30,7 +74,8 @@ var getDataFromDB = function(collection, query) {
 };
 
 var usefulFunctions = {
-  getDataFromDB
+  dbFetchData,
+  dbInsertData
 };
 
 module.exports = usefulFunctions;

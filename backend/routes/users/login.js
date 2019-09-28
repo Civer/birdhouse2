@@ -16,7 +16,7 @@ router.post("/", function(req, res, next) {
   var storedUserObject = {};
 
   authFunctions
-    .checkUserExists()
+    .checkEmailExists()
     .then(resultObject => {
       if (resultObject.userExists === true) {
         return authFunctions.getUserObject(resultObject.userid);
