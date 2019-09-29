@@ -56,10 +56,10 @@ var dbInsertData = function(collection, insertObject) {
 
         dbo
           .collection(collection)
-          .insertMany(insertObject)
+          .insertOne(insertObject)
           .then(result => {
             db.close();
-            resolve(result.insertedCount);
+            resolve(result.insertedIds);
           })
           .catch(error => {
             console.log(error);
@@ -73,9 +73,9 @@ var dbInsertData = function(collection, insertObject) {
   });
 };
 
-var usefulFunctions = {
+var dbFunctions = {
   dbFetchData,
   dbInsertData
 };
 
-module.exports = usefulFunctions;
+module.exports = dbFunctions;

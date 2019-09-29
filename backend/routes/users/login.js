@@ -1,6 +1,8 @@
-var express = require("express");
-var router = express.Router();
-var authFunctions = require("../functions/authenticationFunctions");
+const express = require("express");
+const router = express.Router();
+const authenticationFunctions = require("../functions/authenticationFunctions");
+const userFunctions = require("../functions/userFunctions");
+const sessionFunctions = require("../functions/sessionFunctions");
 
 const url = process.env.BACKEND_MONGO_URL;
 
@@ -13,15 +15,19 @@ var returnObject = {
 router.post("/", function(req, res, next) {
   var username = req.body.username;
   var password = req.body.password;
-  var userid = "";
+  var keepUserLoggedIn = req.body.keepUserLoggedIn;
+  console.log(req.headers.authorization);
+  var userid;
+  var sessionToken;
+  var refreshToken;
 
-  authFunctions
+  userFunctions
     .checkUserExists(username)
     .then(resultObject => {
       if (resultObject.userExists === true) {
         if (resultObject.isVerified === true) {
           userid = resultObject.userid;
-          return authFunctions.getUserSecurityInformation(userid);
+          return authenticationFunctions.getUserSecurityInformation(userid);
         } else {
           return Promise.reject([
             {
@@ -40,7 +46,7 @@ router.post("/", function(req, res, next) {
       }
     })
     .then(securityInformation => {
-      return authFunctions.checkPassword(
+      return authenticationFunctions.checkPassword(
         password,
         securityInformation.password,
         securityInformation.salt
@@ -48,7 +54,7 @@ router.post("/", function(req, res, next) {
     })
     .then(passwordIsValid => {
       if (passwordIsValid === true) {
-        return authFunctions.createNewSession(userid);
+        return sessionFunctions.createNewSession(userid, keepUserLoggedIn);
       } else {
         return Promise.reject([
           {
@@ -58,7 +64,15 @@ router.post("/", function(req, res, next) {
         ]);
       }
     })
-    .then(sessionToken => {})
+    .then(tokenArray => {
+      sessionToken = tokenArray.sessionToken;
+      refreshToken = tokenArray.refreshToken;
+      res.json({
+        userid: userid,
+        sessionToken: sessionToken,
+        refreshToken: refreshToken
+      });
+    })
     .catch(error => {
       console.log(error);
     });
