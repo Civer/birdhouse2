@@ -13,13 +13,23 @@ var returnObject = {
 router.post("/", function(req, res, next) {
   var username = req.body.username;
   var password = req.body.password;
-  var storedUserObject = {};
+  var userid = "";
 
   authFunctions
-    .checkEmailExists()
+    .checkUserExists(username)
     .then(resultObject => {
       if (resultObject.userExists === true) {
-        return authFunctions.getUserObject(resultObject.userid);
+        if (resultObject.isVerified === true) {
+          userid = resultObject.userid;
+          return authFunctions.getUserSecurityInformation(userid);
+        } else {
+          return Promise.reject([
+            {
+              id: 2021,
+              desc: "User is not verified."
+            }
+          ]);
+        }
       } else {
         return Promise.reject([
           {
@@ -29,29 +39,16 @@ router.post("/", function(req, res, next) {
         ]);
       }
     })
-    .then(userObject => {
-      storedUserObject = userObject;
-      if (userObject.isVerified === true) {
-        return authFunctions.getUserSecurityInformation(userObject.id);
-      } else {
-        return Promise.reject([
-          {
-            id: 2021,
-            desc: "User is not verified."
-          }
-        ]);
-      }
-    })
     .then(securityInformation => {
       return authFunctions.checkPassword(
-        storedUserObject.id,
+        password,
         securityInformation.password,
         securityInformation.salt
       );
     })
     .then(passwordIsValid => {
       if (passwordIsValid === true) {
-        return authFunctions.createNewSession(storedUserObject.id);
+        return authFunctions.createNewSession(userid);
       } else {
         return Promise.reject([
           {
@@ -61,6 +58,7 @@ router.post("/", function(req, res, next) {
         ]);
       }
     })
+    .then(sessionToken => {})
     .catch(error => {
       console.log(error);
     });

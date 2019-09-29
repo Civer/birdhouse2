@@ -1,4 +1,5 @@
 var commonFunctions = require("./commonFunctions");
+var crypto = require("crypto");
 
 /**
  * This function will check if an user exists and return its ID
@@ -11,10 +12,7 @@ var commonFunctions = require("./commonFunctions");
 
 var checkUserExists = function(username) {
   return new Promise(function(resolve, reject) {
-    var returnObject = {
-      userExists: null,
-      userid: null
-    };
+    var returnObject = {};
 
     //Set MongoDB collection
     var collection = "users";
@@ -23,7 +21,7 @@ var checkUserExists = function(username) {
     var query = { usernameupper: username.toLocaleUpperCase() };
 
     //Limit results
-    var projection = { projection: { _id: 1 } };
+    var projection = { projection: { _id: 1, isVerified: 1 } };
 
     commonFunctions
       .dbFetchData(collection, query, projection)
@@ -33,6 +31,7 @@ var checkUserExists = function(username) {
           resolve(returnObject);
         } else {
           returnObject.userExists = true;
+          returnObject.isVerified = result[0].isVerified;
           returnObject.userid = result[0]._id;
           resolve(returnObject);
         }
@@ -59,10 +58,7 @@ var checkUserExists = function(username) {
 
 var checkEmailExists = function(email) {
   return new Promise(function(resolve, reject) {
-    var returnObject = {
-      userExists: false,
-      userid: 0
-    };
+    var returnObject = {};
 
     //Set MongoDB collection
     var collection = "users";
@@ -71,7 +67,7 @@ var checkEmailExists = function(email) {
     var query = { emailupper: email.toLocaleUpperCase() };
 
     //Limit results
-    var projection = { projection: { _id: 1 } };
+    var projection = { projection: { _id: 1, isVerified: 1 } };
 
     commonFunctions
       .dbFetchData(collection, query, projection)
@@ -81,6 +77,7 @@ var checkEmailExists = function(email) {
           resolve(returnObject);
         } else {
           returnObject.userExists = true;
+          returnObject.isVerified = result[0].isVerified;
           returnObject.userid = result[0]._id;
           resolve(returnObject);
         }
@@ -112,28 +109,39 @@ var checkEmailExists = function(email) {
 
 var getUserObject = function(userid) {
   return new Promise(function(resolve, reject) {
-    var userObject = {
-      id: "",
-      email: "",
-      firstname: "",
-      lastname: "",
-      country: "",
-      isVerified: false,
-      dateAccountCreated: new Date(),
-      dateLastLogin: new Date()
-    };
+    var userObject = {};
 
-    console.log(userid);
+    //Set MongoDB collection
+    var collection = "users";
 
-    var errors = [];
+    //Search for capitalized email
+    var query = { _id: userid };
 
-    //Check if user has session
+    //Limit results
+    var projection = {};
 
-    if (errors.length === 0) {
-      resolve(userObject);
-    } else {
-      reject(errors);
-    }
+    commonFunctions
+      .dbFetchData(collection, query, projection)
+      .then(result => {
+        userObject.id = result[0]._id;
+        userObject.email = result[0].email;
+        userObject.firstname = result[0].firstname;
+        userObject.lastname = result[0].lastname;
+        userObject.country = result[0].country;
+        userObject.isVerified = result[0].isVerified;
+        userObject.dateAccountCreated = result[0].dateAccountCreated;
+        userObject.dateLastLogin = result[0].dateLastLogin;
+
+        resolve(userObject);
+      })
+      .catch(err => {
+        reject([
+          {
+            id: 2001,
+            desc: "Error with database connection."
+          }
+        ]);
+      });
   });
 };
 
@@ -146,44 +154,63 @@ var getUserObject = function(userid) {
 
 var getUserSecurityInformation = function(userid) {
   return new Promise(function(resolve, reject) {
-    var securityInformation = {
-      salt: "",
-      password: ""
-    };
+    var securityInformation = {};
 
-    var errors = [];
+    //Set MongoDB collection
+    var collection = "users";
 
-    //Check if user has session
+    //Search for capitalized email
+    var query = { _id: userid };
 
-    if (errors.length === 0) {
-      resolve(securityInformation);
-    } else {
-      reject(errors);
-    }
+    //Limit results
+    var projection = { projection: { securityInformation: 1 } };
+
+    commonFunctions
+      .dbFetchData(collection, query, projection)
+      .then(result => {
+        securityInformation = result[0].securityInformation;
+        resolve(securityInformation);
+      })
+      .catch(err => {
+        reject([
+          {
+            id: 2001,
+            desc: "Error with database connection."
+          }
+        ]);
+      });
   });
 };
 
 /**
  *
- * @param {String} userid   MongoDB User ID
- * @param {String} password SHA256 User password
- * @param {String} salt     SHA256 User salt from call "getUserSalt"
+ * @param {String} userid           MongoDB User ID
+ * @param {String} enteredPassword  SHA256 User password entered by user
+ * @param {String} databasePassword SHA256 User password from database
+ * @param {String} salt             SHA256 User salt from call "getUserSalt"
  *
  * @returns {Boolean}       Returns if password used is valid
  */
 
-var checkPassword = function(userid, password, salt) {
+var checkPassword = function(enteredPassword, databasePassword, salt) {
   return new Promise(function(resolve, reject) {
-    var passwordIsValid = false;
+    var passwordIsValid;
 
-    var errors = [];
+    enteredPassword = enteredPassword.toUpperCase();
+    salt = salt.toUpperCase();
 
-    //Check if user has session
+    var saltedPassword = enteredPassword + salt;
+    var sha256Pass = crypto
+      .createHash("sha256")
+      .update(saltedPassword)
+      .digest("hex");
 
-    if (errors.length === 0) {
+    if (sha256Pass.toUpperCase() === databasePassword.toUpperCase()) {
+      passwordIsValid = true;
       resolve(passwordIsValid);
     } else {
-      reject(errors);
+      passwordIsValid = false;
+      resolve(passwordIsValid);
     }
   });
 };
@@ -254,16 +281,35 @@ var renewSession = function(sessionid) {
 
 var createNewSession = function(userid) {
   return new Promise(function(resolve, reject) {
-    var sessionCreated = false;
-    var errors = [];
+    var sessionToken;
 
-    //Try to kill session
+    //Set MongoDB collection
+    var collection = "sessions";
 
-    if (errors.length === 0) {
-      resolve(sessionCreated);
-    } else {
-      reject(errors);
-    }
+    //Define object to be inserted
+    var insertObject = {};
+
+    commonFunctions
+      .dbInsertData(collection, insertObject)
+      .then(result => {
+        if (result.length === 0) {
+          returnObject.userExists = false;
+          resolve(returnObject);
+        } else {
+          returnObject.userExists = true;
+          returnObject.isVerified = result[0].isVerified;
+          returnObject.userid = result[0]._id;
+          resolve(returnObject);
+        }
+      })
+      .catch(err => {
+        reject([
+          {
+            id: 2001,
+            desc: "Error with database connection."
+          }
+        ]);
+      });
   });
 };
 
