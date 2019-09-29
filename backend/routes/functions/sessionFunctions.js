@@ -42,7 +42,11 @@ var checkSession = function(userid, sessionToken) {
         resolve(newToken);
       })
       .catch(error => {
-        reject(error);
+        reject({
+          id: 9002,
+          desc: "Error within sessionFunctions.checkSession",
+          error: error
+        });
       });
   });
 };
@@ -103,7 +107,7 @@ var resetRefreshToken = function(userid) {
  * @returns {Boolean}     Returns if session was created
  */
 
-var createNewSession = function(userid, keepUserLoggedIn) {
+var createNewSession = function(userid) {
   return new Promise(function(resolve, reject) {
     var sessionToken = crypto
       .createHash("sha256")
@@ -118,7 +122,7 @@ var createNewSession = function(userid, keepUserLoggedIn) {
     const payload = { token: sessionToken };
 
     const token = jwt.sign(payload, process.env.BACKEND_JWT_SECRET, {
-      expiresIn: "24h"
+      expiresIn: "1h"
     });
 
     storeSessionToken(userid, sessionToken)
@@ -129,7 +133,13 @@ var createNewSession = function(userid, keepUserLoggedIn) {
           refreshToken: refreshToken
         });
       })
-      .catch(error => reject(error));
+      .catch(error =>
+        reject({
+          id: 9003,
+          desc: "Error within sessionFunctions.createNewSession",
+          error: error
+        })
+      );
   });
 };
 
@@ -209,13 +219,12 @@ var getSessionTokenFromDB = function(userid, token) {
           resolve(result._id);
         }
       })
-      .catch(err => {
-        reject([
-          {
-            id: 2001,
-            desc: "Error with database connection."
-          }
-        ]);
+      .catch(error => {
+        reject({
+          id: 9001,
+          desc: "Error with database connection.",
+          error: error
+        });
       });
   });
 };
@@ -261,13 +270,12 @@ var storeSessionToken = function(userid, token) {
       .then(result => {
         resolve(result);
       })
-      .catch(err => {
-        reject([
-          {
-            id: 2001,
-            desc: "Error with database connection."
-          }
-        ]);
+      .catch(error => {
+        reject({
+          id: 9001,
+          desc: "Error with database connection.",
+          error: error
+        });
       });
   });
 };
@@ -275,7 +283,7 @@ var storeSessionToken = function(userid, token) {
 var storeRefreshToken = function(userid, token) {
   return new Promise(function(resolve, reject) {
     //Choose MongoDB collection
-    var collection = "renewalTokens";
+    var collection = "refreshTokens";
 
     //Define object to be inserted
     var insertObject = {
@@ -289,13 +297,12 @@ var storeRefreshToken = function(userid, token) {
       .then(result => {
         resolve(result);
       })
-      .catch(err => {
-        reject([
-          {
-            id: 2001,
-            desc: "Error with database connection."
-          }
-        ]);
+      .catch(error => {
+        reject({
+          id: 9001,
+          desc: "Error with database connection.",
+          error: error
+        });
       });
   });
 };

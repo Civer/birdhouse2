@@ -17,7 +17,7 @@ var checkUserExists = function(username) {
     var collection = "users";
 
     //Search for users with this username
-    var query = { usernameupper: username.toLocaleUpperCase() };
+    var query = { usernameupper: username.toUpperCase() };
 
     //Limit results
     var projection = { projection: { _id: 1, isVerified: 1 } };
@@ -35,13 +35,12 @@ var checkUserExists = function(username) {
           resolve(returnObject);
         }
       })
-      .catch(err => {
-        reject([
-          {
-            id: 2001,
-            desc: "Error with database connection."
-          }
-        ]);
+      .catch(error => {
+        reject({
+          id: 9001,
+          desc: "Error with database connection.",
+          error: error
+        });
       });
   });
 };
@@ -63,7 +62,7 @@ var checkEmailExists = function(email) {
     var collection = "users";
 
     //Search for capitalized email
-    var query = { emailupper: email.toLocaleUpperCase() };
+    var query = { emailupper: email.toUpperCase() };
 
     //Limit results
     var projection = { projection: { _id: 1, isVerified: 1 } };
@@ -81,13 +80,12 @@ var checkEmailExists = function(email) {
           resolve(returnObject);
         }
       })
-      .catch(err => {
-        reject([
-          {
-            id: 2001,
-            desc: "Error with database connection."
-          }
-        ]);
+      .catch(error => {
+        reject({
+          id: 9001,
+          desc: "Error with database connection.",
+          error: error
+        });
       });
   });
 };
@@ -133,13 +131,12 @@ var getUserObject = function(userid) {
 
         resolve(userObject);
       })
-      .catch(err => {
-        reject([
-          {
-            id: 2001,
-            desc: "Error with database connection."
-          }
-        ]);
+      .catch(error => {
+        reject({
+          id: 9001,
+          desc: "Error with database connection.",
+          error: error
+        });
       });
   });
 };

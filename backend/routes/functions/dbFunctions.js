@@ -26,13 +26,11 @@ var dbFetchData = function(collection, query, projection) {
             resolve(result);
           })
           .catch(error => {
-            console.log(error);
-            reject("Database Error");
+            reject(error);
           });
       })
       .catch(error => {
-        console.log(error);
-        reject("Database Error");
+        reject(error);
       });
   });
 };
@@ -62,13 +60,11 @@ var dbInsertData = function(collection, insertObject) {
             resolve(result.insertedIds);
           })
           .catch(error => {
-            console.log(error);
-            reject("Database Error");
+            reject(error);
           });
       })
       .catch(error => {
-        console.log(error);
-        reject("Database Error");
+        reject(error);
       });
   });
 };

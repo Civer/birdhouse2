@@ -28,13 +28,12 @@ var getUserSecurityInformation = function(userid) {
         securityInformation = result[0].securityInformation;
         resolve(securityInformation);
       })
-      .catch(err => {
-        reject([
-          {
-            id: 2001,
-            desc: "Error with database connection."
-          }
-        ]);
+      .catch(error => {
+        reject({
+          id: 9001,
+          desc: "Error with database connection.",
+          error: error
+        });
       });
   });
 };
@@ -53,8 +52,8 @@ var checkPassword = function(enteredPassword, databasePassword, salt) {
   return new Promise(function(resolve, reject) {
     var passwordIsValid;
 
-    enteredPassword = enteredPassword.toUpperCase();
-    salt = salt.toUpperCase();
+    enteredPassword = enteredPassword;
+    salt = salt;
 
     var saltedPassword = enteredPassword + salt;
 
@@ -74,9 +73,12 @@ var checkPassword = function(enteredPassword, databasePassword, salt) {
           resolve(passwordIsValid);
         }
       })
-      .catch(function(error) {
-        console.log(error);
-        reject(error);
+      .catch(error => {
+        reject({
+          id: 9004,
+          desc: "Error in authenticationFunctions.checkPassword",
+          error: error
+        });
       });
   });
 };
