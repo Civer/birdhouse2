@@ -10,6 +10,11 @@ const getUserError = function(errorId) {
   cleanUserError.errorId = errorId;
 
   switch (errorId) {
+    /**
+     * 2000er Code Range
+     * Username and Password related errors
+     */
+
     case 2020:
       cleanUserError.message = "Username or password is invalid or not known";
       break;
@@ -34,12 +39,22 @@ const getUserError = function(errorId) {
     case 2052:
       cleanUserError.message = "Email already taken";
       break;
-    case 3001:
-      cleanUserError.message = "Problem with connection";
+    case 2053:
+      cleanUserError.message = "An unexpected backend error occured";
       break;
+    /**
+     * 4000er Code Range
+     * Refresh Token
+     */
+
     case 4001:
       cleanUserError.message = "Refresh Token not valid";
       break;
+    /**
+     * 9000er Code Range
+     * Backend and Database
+     */
+
     case 9001:
       cleanUserError.message = "An unexpected backend error occured";
       break;

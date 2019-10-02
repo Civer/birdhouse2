@@ -12,8 +12,12 @@ router.post("/", function(req, res, next) {
 
   sessionFunctions
     .checkRefreshToken(userid, token)
-    .then(() => sessionFunctions.killAllSessions(userid))
-    .then(() => sessionFunctions.createNewSession(userid))
+    .then(() => {
+      return sessionFunctions.killAllSessions(userid);
+    })
+    .then(() => {
+      return sessionFunctions.createNewSession(userid);
+    })
     .then(tokenArray => {
       sessionToken = tokenArray.sessionToken;
       refreshToken = tokenArray.refreshToken;

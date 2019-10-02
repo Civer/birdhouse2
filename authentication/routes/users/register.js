@@ -1,14 +1,15 @@
 const express = require("express");
 const router = express.Router();
-const authenticationFunctions = require("../functions/authenticationFunctions");
 const userFunctions = require("../functions/userFunctions");
-const sessionFunctions = require("../functions/sessionFunctions");
 const errorFunctions = require("../functions/errorFunctions");
+const mailFunctions = require("../functions/mailFunctions");
 
 router.post("/", function(req, res, next) {
   const username = req.body.username;
   const password = req.body.password;
   const email = req.body.email;
+
+  var userid;
 
   if (!username) {
     res.json(
@@ -36,7 +37,7 @@ router.post("/", function(req, res, next) {
       .checkUserIsUnique(username, email)
       .then(userIsUnique => {
         if (userIsUnique === true) {
-          return userFunctions.createNewUser(username, password, email);
+          return userFunctions.createNewUser(username, email, password);
         } else {
           return Promise.reject({
             id: 2053,
@@ -44,7 +45,24 @@ router.post("/", function(req, res, next) {
           });
         }
       })
-
+      .then(createdUserResult => {
+        userid = createdUserResult.insertedId;
+        return userFunctions.createVerificationToken(
+          createdUserResult.insertedId
+        );
+      })
+      .then(verificationToken => {
+        console.log(verificationToken);
+        return mailFunctions.sendRegistrationMail(
+          email,
+          userid,
+          verificationToken
+        );
+      })
+      .then(() => {
+        //Send Email + Password + UserID so that the user can be cloned in business database
+        res.json("");
+      })
       .catch(error => {
         res.json(errorFunctions.returnErrorMessage(error));
       });

@@ -72,7 +72,7 @@ var dbInsertData = function(collection, insertObject) {
           .collection(collection)
           .insertOne(insertObject)
           .then(result => {
-            resolve(result.insertedIds);
+            resolve(result);
           })
           .catch(error => {
             reject(error);
@@ -100,7 +100,7 @@ var dbDeleteData = function(collection, query) {
           .collection(collection)
           .deleteMany(query)
           .then(result => {
-            resolve(result.deletedCount);
+            resolve(result);
           })
           .catch(error => {
             reject(error);

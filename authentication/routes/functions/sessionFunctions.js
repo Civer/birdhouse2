@@ -129,7 +129,6 @@ var getRefreshTokenFromDB = function(userid, token) {
     dbFunctions
       .dbFetchData(collection, query, projection)
       .then(result => {
-        console.log(result);
         if (result.length === 0) {
           reject({
             id: 4001,

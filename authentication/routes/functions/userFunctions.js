@@ -1,4 +1,7 @@
 const dbFunctions = require("./dbFunctions");
+const crypto = require("crypto");
+const usefulFunctions = require("./usefulFunctions");
+const bcrypt = require("bcrypt");
 
 /**
  * This function will check if an user exists and return its ID
@@ -17,7 +20,7 @@ var checkUserExists = function(username) {
     var collection = "users";
 
     //Search for users with this username
-    var query = { usernameupper: username.toUpperCase() };
+    var query = { username: username.toLowerCase() };
 
     //Limit results
     var projection = { projection: { _id: 1, isVerified: 1 } };
@@ -62,7 +65,7 @@ var checkEmailExists = function(email) {
     var collection = "users";
 
     //Search for capitalized email
-    var query = { emailupper: email.toUpperCase() };
+    var query = { email: email.toLowerCase() };
 
     //Limit results
     var projection = { projection: { _id: 1, isVerified: 1 } };
@@ -192,41 +195,77 @@ var getUserObject = function(userid) {
 
 var createNewUser = function(username, email, password) {
   return new Promise(function(resolve, reject) {
-    var returnObject = {
-      userCreated: false,
-      id: "",
-      email: ""
-    };
-    var errors = [];
-
-    //Needed later
-    /*
     const saltRounds = 14;
 
     var salt = crypto
       .createHash("sha256")
       .update(usefulFunctions.generateToken(32))
-      .digest("hex").toUpperCase();
+      .digest("hex");
 
     var saltedPassword = password + salt;
 
+    var sha256Pass = crypto
+      .createHash("sha256")
+      .update(saltedPassword)
+      .digest("hex");
+
     bcrypt
-      .hash(saltedPassword, saltRounds)
+      .hash(sha256Pass, saltRounds)
       .then(function(result) {
-        var readyToStoreInDatabase = result;
+        var encryptedPassword = result;
+        return storeUserInDatabase(username, email, encryptedPassword, salt);
+      })
+      .then(result => {
+        resolve(result);
       })
       .catch(function(error) {
-        console.log(error);
+        reject(error);
       });
-*/
+  });
+};
 
-    //Try to kill session
+/**
+ * This function is used for creating a new user in the database
+ *
+ * @param {String} username Username as string
+ * @param {String} email    Email of user
+ * @param {String} encryptedPassword bcrypt password
+ * @param {String} salt SHA256 salt
+ *
+ * @returns {Object.userCreated}  Boolean States if user is created in database
+ * @returns {Object.id}           String  Returned MongoDB _id for new user
+ * @returns {Object.email}        String  Email of user
+ */
 
-    if (errors.length === 0) {
-      resolve(returnObject);
-    } else {
-      reject(errors);
-    }
+var storeUserInDatabase = function(username, email, encryptedPassword, salt) {
+  return new Promise(function(resolve, reject) {
+    //Choose MongoDB collection
+    var collection = "users";
+
+    //Define object to be inserted
+    var insertObject = {
+      username: username.toLowerCase(),
+      email: email.toLowerCase(),
+      securityInformation: {
+        password: encryptedPassword,
+        salt: salt
+      },
+      isVerified: false,
+      creationDate: new Date()
+    };
+
+    dbFunctions
+      .dbInsertData(collection, insertObject)
+      .then(result => {
+        resolve(result);
+      })
+      .catch(error => {
+        reject({
+          id: 9001,
+          desc: "Error with database connection.",
+          error: error
+        });
+      });
   });
 };
 
@@ -240,41 +279,34 @@ var createNewUser = function(username, email, password) {
 
 var createVerificationToken = function(userid) {
   return new Promise(function(resolve, reject) {
-    var token = "";
-    var errors = [];
+    var token = crypto
+      .createHash("sha256")
+      .update(usefulFunctions.generateToken(32))
+      .digest("hex");
 
-    //Try to kill session
+    var collection = "verificationTokens";
 
-    if (errors.length === 0) {
-      resolve(tokenSend);
-    } else {
-      reject(errors);
-    }
-  });
-};
+    //Define object to be inserted
+    var insertObject = {
+      token: token,
+      userid: userid,
+      creationDate: new Date(),
+      active: true
+    };
 
-/**
- * This function triggers the sending of a verification token
- *
- * @param {String} email  Email of user
- * @param {String} userid MongoDB user id
- * @param {String} token  SHA256 token
- *
- * @returns {Boolean}     Returns if mail was send
- */
-
-var sendVerificationToken = function(email, userid, token) {
-  return new Promise(function(resolve, reject) {
-    var tokenSend = false;
-    var errors = [];
-
-    //Try to kill session
-
-    if (errors.length === 0) {
-      resolve(tokenSend);
-    } else {
-      reject(errors);
-    }
+    dbFunctions
+      .dbInsertData(collection, insertObject)
+      .then(() => {
+        resolve(token);
+      })
+      .catch(error => {
+        reject({
+          id: 9001,
+          desc: "Error with database connection.",
+          error: error
+        });
+      });
+    console.log("TEst");
   });
 };
 
@@ -334,7 +366,6 @@ var userFunctions = {
 
   createNewUser,
   createVerificationToken,
-  sendVerificationToken,
   checkVerificationToken,
   activateUserAccount
 };
