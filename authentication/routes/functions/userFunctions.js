@@ -91,6 +91,43 @@ var checkEmailExists = function(email) {
 };
 
 /**
+ * This function will check if an email exists and return dedicated userid
+ *
+ * @param {String} username          String with email
+ * @param {String} email          String with email
+ *
+ * @returns {Object.userExists}   Boolean indicating if user exists
+ * @returns {Object.userid}       MongoDB userid
+ */
+
+var checkUserIsUnique = function(username, email) {
+  return new Promise(function(resolve, reject) {
+    checkUserExists(username)
+      .then(usernameReturnObject => {
+        if (usernameReturnObject.userExists === false) {
+          return checkEmailExists(email);
+        } else {
+          return Promise.reject({
+            id: 2051,
+            desc: "User already existing"
+          });
+        }
+      })
+      .then(emailReturnObject => {
+        if (emailReturnObject.userExists === false) {
+          resolve(true);
+        } else {
+          return Promise.reject({
+            id: 2052,
+            desc: "EMail already existing"
+          });
+        }
+      })
+      .catch(error => reject(error));
+  });
+};
+
+/**
  *
  * @param {String} userid                MongoDB Id of user
  *
@@ -291,6 +328,7 @@ var activateUserAccount = function(userid) {
 var userFunctions = {
   checkUserExists,
   checkEmailExists,
+  checkUserIsUnique,
 
   getUserObject,
 

@@ -4,10 +4,9 @@ const sessionFunctions = require("../functions/sessionFunctions");
 const errorFunctions = require("../functions/errorFunctions");
 
 router.post("/", function(req, res, next) {
-  var userid = req.body.userid;
-  var token = req.cookies.refreshToken;
+  const userid = req.body.userid;
+  const token = req.cookies.refreshToken;
 
-  //console.log(req.headers.authorization);
   var sessionToken;
   var refreshToken;
 
@@ -26,7 +25,6 @@ router.post("/", function(req, res, next) {
     })
     .catch(error => {
       if (error.id === 4001) {
-        console.log(userid);
         sessionFunctions
           .killAllSessions(userid)
           .then(() => res.json(errorFunctions.returnErrorMessage(error)));

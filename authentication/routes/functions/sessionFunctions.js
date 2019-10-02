@@ -45,10 +45,13 @@ const createNewSession = function(userid) {
       .digest("hex");
 
     const payload = { userid: userid };
+    const options = { algorithm: "HS512", expiresIn: "1h" };
 
-    const sessionToken = jwt.sign(payload, process.env.BACKEND_JWT_SECRET, {
-      expiresIn: "1h"
-    });
+    const sessionToken = jwt.sign(
+      payload,
+      process.env.BACKEND_JWT_SECRET,
+      options
+    );
 
     storeRefreshToken(userid, refreshToken)
       .then(() => {
@@ -123,8 +126,6 @@ var getRefreshTokenFromDB = function(userid, token) {
     };
     var projection = { projection: { _id: 1 } };
 
-    console.log(query);
-
     dbFunctions
       .dbFetchData(collection, query, projection)
       .then(result => {
@@ -176,12 +177,6 @@ var storeRefreshToken = function(userid, token) {
       });
   });
 };
-
-var createSessionToken = function(token) {
-  return new Promise(function(resolve, reject) {});
-};
-
-var verifySessionToken = function(token) {};
 
 var sessionFunctions = {
   checkRefreshToken,

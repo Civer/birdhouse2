@@ -5,20 +5,10 @@ const userFunctions = require("../functions/userFunctions");
 const sessionFunctions = require("../functions/sessionFunctions");
 const errorFunctions = require("../functions/errorFunctions");
 
-const url = process.env.BACKEND_MONGO_URL;
-
-var returnObject = {
-  validCall: true,
-  body: {},
-  errors: {}
-};
-
 router.post("/", function(req, res, next) {
-  var username = req.body.username;
-  var password = req.body.password;
+  const username = req.body.username;
+  const password = req.body.password;
 
-  //console.log(req.cookies);
-  //console.log(req.headers.authorization);
   var userid;
   var sessionToken;
   var refreshToken;

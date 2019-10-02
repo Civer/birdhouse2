@@ -25,6 +25,15 @@ const getUserError = function(errorId) {
     case 2032:
       cleanUserError.message = "Password not handed over";
       break;
+    case 2033:
+      cleanUserError.message = "Email not handed over";
+      break;
+    case 2051:
+      cleanUserError.message = "Username already taken";
+      break;
+    case 2052:
+      cleanUserError.message = "Email already taken";
+      break;
     case 3001:
       cleanUserError.message = "Problem with connection";
       break;
