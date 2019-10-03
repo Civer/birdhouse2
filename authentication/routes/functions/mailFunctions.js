@@ -2,11 +2,11 @@ var nodemailer = require("nodemailer");
 
 var initMailTransporter = function() {
   var transporter = nodemailer.createTransport({
-    host: process.env.BACKEND_SMTP_HOST,
-    port: process.env.BACKEND_SMTP_PORT,
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT,
     auth: {
-      user: process.env.BACKEND_SMTP_USERNAME,
-      pass: process.env.BACKEND_SMTP_PASSWORD
+      user: process.env.SMTP_USERNAME,
+      pass: process.env.SMTP_PASSWORD
     }
   });
   return transporter;
@@ -14,7 +14,7 @@ var initMailTransporter = function() {
 
 var sendRegistrationMail = function(email, userid, token) {
   return new Promise((resolve, reject) => {
-    var url = process.env.BACKEND_AUTH_URL + "/verify/" + userid + "_" + token;
+    var url = process.env.AUTH_SERVER_URL + "/verify/" + userid + "_" + token;
 
     var transporter = initMailTransporter();
 

@@ -2,12 +2,25 @@
 # Rename this file to .env and change dummy flag to false
 
 # Dummy flag
-BACKEND_DUMMY = false
+DUMMY_FILE = false
 
-# Environmental flags
-BACKEND_STAGING = false
+# Environment
+PORT = "12345"
+TYPE = "development"
+
+# API Server Urls
+AUTH_SERVER_URL = "Link to Auth Server + Port"
+DATA_SERVER_URL = "Link to Data Server + Port"
 
 # API URLs
-## Development 
-BACKEND_MONGO_URL = "mongodb://localhost:12345/"
-BACKEND_MONGO_DATABASE = "yourDatabaseName"
+MONGO_URL = "mongodb://localhost:12345/"
+MONGO_DATABASE = "YourBeautifulDatabase"
+
+# JWT BEARER SECRET
+JWT_SECRET = "CrazySecretForAwesomeSecurity!Lead!ProgrammerRulez!!!"
+
+# STMP SERVER
+SMTP_HOST = "yourHost"
+SMTP_PORT = "587"
+SMTP_USERNAME = "User"
+SMTP_PASSWORD = "Password1"

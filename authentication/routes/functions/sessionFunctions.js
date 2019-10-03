@@ -47,11 +47,7 @@ const createNewSession = function(userid) {
     const payload = { userid: userid };
     const options = { algorithm: "HS512", expiresIn: "1h" };
 
-    const sessionToken = jwt.sign(
-      payload,
-      process.env.BACKEND_JWT_SECRET,
-      options
-    );
+    const sessionToken = jwt.sign(payload, process.env.JWT_SECRET, options);
 
     storeRefreshToken(userid, refreshToken)
       .then(() => {

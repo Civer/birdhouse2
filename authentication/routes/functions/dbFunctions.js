@@ -12,7 +12,7 @@ var option = {
 var dbPool;
 
 var initDatabase = function() {
-  MongoClient.connect(process.env.BACKEND_MONGO_URL, option)
+  MongoClient.connect(process.env.MONGO_URL, option)
     .then(db => {
       dbPool = db;
     })
@@ -37,7 +37,7 @@ var dbFetchData = function(collection, query, projection) {
   return new Promise(function(resolve, reject) {
     getDB()
       .then(db => {
-        var dbo = db.db(process.env.BACKEND_MONGO_DATABASE);
+        var dbo = db.db(process.env.MONGO_DATABASE);
 
         dbo
           .collection(collection)
@@ -66,7 +66,7 @@ var dbInsertData = function(collection, insertObject) {
   return new Promise(function(resolve, reject) {
     getDB()
       .then(db => {
-        var dbo = db.db(process.env.BACKEND_MONGO_DATABASE);
+        var dbo = db.db(process.env.MONGO_DATABASE);
 
         dbo
           .collection(collection)
@@ -94,7 +94,7 @@ var dbDeleteData = function(collection, query) {
   return new Promise(function(resolve, reject) {
     getDB()
       .then(db => {
-        var dbo = db.db(process.env.BACKEND_MONGO_DATABASE);
+        var dbo = db.db(process.env.MONGO_DATABASE);
 
         dbo
           .collection(collection)
