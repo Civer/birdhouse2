@@ -1,7 +1,7 @@
 const dbFunctions = require("./dbFunctions");
 const crypto = require("crypto");
-const usefulFunctions = require("./usefulFunctions");
 const bcrypt = require("bcrypt");
+const uuidv4 = require("uuid/v4");
 
 /**
  * This function will check if an user exists and return its ID
@@ -199,7 +199,7 @@ var createNewUser = function(username, email, password) {
 
     var salt = crypto
       .createHash("sha256")
-      .update(usefulFunctions.generateToken(32))
+      .update(uuidv4())
       .digest("hex");
 
     var saltedPassword = password + salt;
@@ -281,7 +281,7 @@ var createVerificationToken = function(userid) {
   return new Promise(function(resolve, reject) {
     var token = crypto
       .createHash("sha256")
-      .update(usefulFunctions.generateToken(32))
+      .update(uuidv4())
       .digest("hex");
 
     var collection = "verificationTokens";

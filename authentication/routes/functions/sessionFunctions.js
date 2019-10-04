@@ -1,8 +1,8 @@
 const jwt = require("jsonwebtoken");
 const dbFunctions = require("./dbFunctions");
-const usefulFunctions = require("./usefulFunctions");
 const crypto = require("crypto");
 const mongo = require("mongodb");
+const uuidv4 = require("uuid/v4");
 
 /**
  * This function returns an active session.
@@ -41,7 +41,7 @@ const createNewSession = function(userid) {
   return new Promise(function(resolve, reject) {
     const refreshToken = crypto
       .createHash("sha256")
-      .update(usefulFunctions.generateToken(32))
+      .update(uuidv4())
       .digest("hex");
 
     const payload = { userid: userid };
