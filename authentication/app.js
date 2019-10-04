@@ -14,6 +14,7 @@ var loginRouter = require("./routes/users/login");
 var refreshRouter = require("./routes/users/refreshSession");
 var registerRouter = require("./routes/users/register");
 
+process.env.NODE_ENV = process.env.TYPE;
 var app = express();
 
 dbFunctions.initDatabase();

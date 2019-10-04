@@ -1,4 +1,5 @@
 var nodemailer = require("nodemailer");
+const Email = require("email-templates");
 
 var initMailTransporter = function() {
   var transporter = nodemailer.createTransport({
@@ -12,29 +13,39 @@ var initMailTransporter = function() {
   return transporter;
 };
 
-var sendRegistrationMail = function(email, userid, token) {
+var sendRegistrationMail = function(emailAddress, userid, token) {
   return new Promise((resolve, reject) => {
-    var url = process.env.AUTH_SERVER_URL + "/verify/" + userid + "_" + token;
+    console.log(process.env.NODE_ENV);
+    var url = process.env.AUTH_SERVER_URL + "verify/" + userid + "_" + token;
 
-    var transporter = initMailTransporter();
+    var transport = initMailTransporter();
 
-    var mailOptions = {
-      from: "apps@rpggamer.de",
-      to: email,
-      subject: "Sending Email using Node.js",
-      text: "Your token:" + url
-    };
+    const email = new Email({
+      message: {
+        from: "apps@rpggamer.de"
+      },
+      // uncomment below to send emails in development/test env:
+      send: true,
+      transport,
+      views: {
+        options: {
+          extension: "ejs" // <---- HERE
+        }
+      }
+    });
 
-    transporter
-      .sendMail(mailOptions)
-      .then(info => {
-        console.log("Email sent: " + info.response);
-        resolve(info);
+    email
+      .send({
+        template: "registrationSuccesful",
+        message: {
+          to: emailAddress
+        },
+        locals: {
+          link: url
+        }
       })
-      .catch(error => {
-        console.log(error);
-        reject(error);
-      });
+      .then(info => resolve(info))
+      .catch(error => reject(error));
   });
 };
 
